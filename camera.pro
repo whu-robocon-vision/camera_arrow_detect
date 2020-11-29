@@ -1,5 +1,5 @@
 QT       += core gui
-
+QT       += serialport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -18,13 +18,15 @@ DEFINES += QT_DEPRECATED_WARNINGS _D
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    myrealsense.cpp
+    myrealsense.cpp \
+    colordetect.cpp
 
 HEADERS += \
     color.h \
     common.h \
     mainwindow.h \
-    myrealsense.h
+    myrealsense.h \
+    colordetect.h
 
 INCLUDEPATH += \
     -I/usr/local/include/opencv \
@@ -33,7 +35,7 @@ INCLUDEPATH += \
 FORMS += \
     mainwindow.ui
 LIBS += -lrealsense2\
--L/usr/local/lib -lopencv_dnn -lopencv_ml -lopencv_objdetect -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_videostab -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_video -lopencv_photo -lopencv_imgproc -lopencv_flann -lopencv_core
+-L/usr/local/lib -lopencv_ml -lopencv_objdetect -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_videostab -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_video -lopencv_photo -lopencv_imgproc -lopencv_flann -lopencv_core
 
 
 # Default rules for deployment.

@@ -12,8 +12,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->cover->installEventFilter(this);
 
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+        QSerialPort serial;
+        serial.setPort(info);
+        ui->serial_list->addItem(serial.portName());
+    }
     connect(realsense, &rs2::MyRealsense::frameOK, this, &MainWindow::show_img);
     connect(realsense, &rs2::MyRealsense::caliOK, this, &MainWindow::generate_extrin);
+    connect(realsense, &rs2::MyRealsense::arrow_detected, this, &MainWindow::send_arrow_coords);
 }
 
 MainWindow::~MainWindow()
@@ -123,4 +129,72 @@ eCaliPos MainWindow::getCaliPos()
     else if (ui->rbtnDR->isChecked()) pos = DR;
     else pos = DL;
     return pos;
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+
+}
+
+void MainWindow::on_comboBoxFun_currentIndexChanged(int index)
+{
+    FUN fun = (FUN)index;
+    if (fun == DETECT_ARROW)
+        realsense->setMode(COLOR_MODE);
+    realsense->setFUN(fun);
+}
+
+void MainWindow::on_serial_refresh_clicked()
+{
+    ui->serial_list->clear();
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
+        QSerialPort serial;
+        serial.setPort(info);
+        ui->serial_list->addItem(serial.portName());
+    }
+}
+
+void MainWindow::on_serial_open_stateChanged(int arg1)
+{
+    ui->serial_output->append(QChar(arg1 + '0'));
+    if (ui->serial_open->checkState() == Qt::Checked) {
+        qint32 baudrate = 115200;
+        QString portname = ui->serial_list->currentText();
+
+        ui->serial_output->append("device name : " + portname);
+        serial = new QSerialPort();
+        serial->setPortName(portname);
+        if (!serial->open(QIODevice::ReadWrite)) {
+            ui->serial_output->append("open failed");
+            return;
+        };
+        serial->setBaudRate(baudrate);
+        serial->setDataBits(QSerialPort::Data8);
+        serial->setParity(QSerialPort::NoParity);
+        serial->setStopBits(QSerialPort::OneStop);
+        serial->setFlowControl(QSerialPort::NoFlowControl);
+        // QObject::connect(serial, &QSerialPort::readyRead, this, &Widget::read_data);
+        ui->serial_output->append("open device");
+    } else {
+        if (!serial->isOpen()) {
+            ui->serial_output->append("device not open");
+            return;
+        }
+        serial->clear();
+        serial->close();
+        serial->deleteLater();
+        ui->serial_output->append("close device");
+    }
+}
+
+void MainWindow::send_arrow_coords()
+{
+    if (serial->isOpen()) {
+        std::vector<cv::Point> points = realsense->arrow_mid_points;
+        std::vector<cv::Point3f> world_coords;
+        for (size_t i = 0; i < points.size(); i++) {
+            world_coords.push_back(realsense->getWorldCoord(points[i].x, points[i].y));
+            serial->write("hello world\n");
+        }
+    }
 }

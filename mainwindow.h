@@ -14,6 +14,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    QSerialPort *serial;
 
 private slots:
     void on_checkBox_stateChanged(int arg1);
@@ -29,6 +30,16 @@ private slots:
     void on_btnCaliContinue_clicked();
 
     void on_btnCaliGen_clicked();
+
+    void on_pushButton_clicked();
+
+    void on_comboBoxFun_currentIndexChanged(int index);
+
+    void on_serial_refresh_clicked();
+
+    void on_serial_open_stateChanged(int arg1);
+
+    void send_arrow_coords();
 
 private:
     Ui::MainWindow *ui;

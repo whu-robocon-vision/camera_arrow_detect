@@ -1,4 +1,5 @@
 #include "myrealsense.h"
+#include "colordetect.h"
 
 namespace rs2 {
 MyRealsense::MyRealsense(QObject *parent) : QThread(parent)
@@ -178,6 +179,11 @@ void MyRealsense::calibrate(int n_row, int n_col)
     }
 }
 
+void MyRealsense::move_detect()
+{
+
+}
+
 std::vector<cv::Point3f> MyRealsense::getMualWorldCoor()
 {
     std::vector<cv::Point3f> points;
@@ -285,7 +291,11 @@ void MyRealsense::run()
         }
         color_img = cv::Mat(cv::Size(width, height), CV_8UC3, (void *)color_frame.get_data(), cv::Mat::AUTO_STEP);
         depth_img = cv::Mat(cv::Size(width, height), CV_16UC1, (void *)depth_frame.get_data(), cv::Mat::AUTO_STEP);
-
+        if (this->getFUN() == DETECT_ARROW) {
+            arrow_mid_points = colordetect().detect_arrow(color_img);
+            if (!arrow_mid_points.empty())
+                emit arrow_detected();
+        }
         emit frameOK();
     }
     DBG(GREEN "<run> : " NONE "thread stop");

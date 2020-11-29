@@ -9,6 +9,15 @@ enum RSMode{
     INFRA2_MODE
 };
 
+enum FUN{
+    NOTHING,
+    DETECT_ARROW
+};
+
+enum MOVE_DETECT_METHOD {
+    BG_SUB
+};
+
 enum RSState{
     WORK,
     STOP,
@@ -31,6 +40,7 @@ class MyRealsense : public QThread
 signals:
     void frameOK();
     void caliOK(bool isOK);
+    void arrow_detected();
 
 public:
     MyRealsense(QObject *parent);
@@ -38,6 +48,9 @@ public:
 
     RSMode getMode() {return this->mode;}
     void setMode(RSMode mode) {this->mode = mode;}
+
+    FUN getFUN() {return this->fun;}
+    void setFUN(FUN fun) {this->fun = fun;}
     bool open(QLabel *label);
     bool open(QLabel *lab_cover, QLabel *lab_fps);
     RSState getState() {return this->state;}
@@ -64,6 +77,9 @@ public:
     int getCaliCols() {return this->n_cols;}
     void setCaliPos(eCaliPos pos) {this->cali_pos = pos;}
     eCaliPos getCaliPos() {return this->cali_pos;}
+
+    void move_detect();
+    std::vector<cv::Point> arrow_mid_points;
 
     rs2_intrinsics color_intrin;
     rs2_intrinsics depth_intrin;
@@ -97,6 +113,7 @@ private:
 
     RSState state;
     RSMode mode;
+    FUN fun;
 
     pipeline pipe;
     config cfg;
